@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  client:
+    build: ./client
+    ports:
+      - '3000:3000'
+    stdin_open: true
+    tty: true
+
+  server:
+    build: ./server
+    ports:
+      - '5000:5000'
+    environment:
+      - PORT=5000
+      - PGUSER=postgres
+      - PGHOST=db
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres
+      - PGPORT=5432
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - '5432:5432'
