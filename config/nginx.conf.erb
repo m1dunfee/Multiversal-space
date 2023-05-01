@@ -1,0 +1,33 @@
+worker_processes auto;
+pid <%= ENV["NGINX_PID_PATH"] %>;
+daemon off;
+
+events {
+    worker_connections <%= ENV["NGINX_WORKER_CONNECTIONS"] %>;
+}
+
+http {
+    include mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types application/javascript application/x-javascript application/xml text/css text/javascript text/plain text/xml;
+
+    server {
+        listen <%= ENV["PORT"] %>;
+        server_name _;
+        keepalive_timeout <%= ENV["NGINX_KEEPALIVE_TIMEOUT"] %>;
+
+        root <%= ENV["APP_PATH"] %>/public;
+        try_files $uri/index.html $uri.html $uri @proxy;
+
+        location @proxy {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+            proxy_redirect off;
+            proxy_pass http://127.0.0.1:<%= ENV["BACKEND_PORT"] %>;
+        }
+    }
+}
